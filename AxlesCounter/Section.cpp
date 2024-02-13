@@ -78,6 +78,16 @@ void Section::print(int p) {
 
 int Section::getAxles() const { return axlesCount; }
 
+const std::vector<std::pair<AxleSensor*, bool>>& Section::getSensors() const
+{
+	return sensors;
+}
+
+std::string Section::GetName() const
+{
+	return name;
+}
+
 //инициализация после добавления в секцию датчика
 void Section::InitBefore() {
 	sumCounterBefore = 0;

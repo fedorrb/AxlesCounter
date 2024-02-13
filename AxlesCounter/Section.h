@@ -39,6 +39,10 @@ public:
 
 	int getAxles() const;
 
+	const std::vector<std::pair<AxleSensor*, bool>>& getSensors() const;
+
+	std::string GetName() const;
+
 private:
 	//инициализация после добавления в секцию датчика
 	void InitBefore();

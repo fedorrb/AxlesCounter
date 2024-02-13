@@ -14,6 +14,8 @@ public:
 
 	const std::vector<std::pair<AxleSensor*, int>>& getSensors() const;
 
+	int getId() const;
+
 private:
 	int id;
 	std::vector<std::pair<AxleSensor*, int>> sensors;

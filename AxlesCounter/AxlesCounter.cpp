@@ -4,6 +4,9 @@
 #include "TrainRoute.h"
 #include "Train.h"
 #include "Cycle.h"
+#include <nlohmann/json.hpp>
+
+using json = nlohmann::json;
 
 /*
 *  назначение классов
@@ -15,9 +18,16 @@
 
 std::mutex cout_mutex; // семафор для вывода в выходной поток из разных потоков
 
-int main() {
-	std::vector<std::string> errors;
-	errors.clear();
+int main(int argc, char** argv) {
+	//std::vector<std::string> errors;
+	//errors.clear();
+	std::string JSONFileName = "AxlesCounter.json";
+	if (argc > 1) {
+		JSONFileName = argv[1];
+	}
+	std::cout << "Loading configuration from " << JSONFileName << std::endl;
+	if(argc == 1)
+		std::cout << "To read the configuration from another file, pass it as a parameter" << std::endl;
 	std::cout << "Working..." << std::endl;
 	// файл журнала
 	std::ofstream outputFile("output.txt");
@@ -29,160 +39,160 @@ int main() {
 	std::cout.rdbuf(outputFile.rdbuf()); // перенаправление std::cout в файл
 
 	{
+		// Відкриття файлу JSON для зчитування
+		std::ifstream file(JSONFileName);
+		// Перевірка, чи вдалося відкрити файл
+		if (!file.is_open()) {
+			std::cerr << "Could not open the file " << JSONFileName << std::endl;
+			return 1;
+		}
+		// Зчитування даних з файлу JSON
+		json data;
+		try {
+			file >> data;
+		}
+		catch (...) {
+			std::cerr << "Error in JSON file!" << std::endl;
+			return 1;
+		}
+
 		// 1 Подготовка
 		// 1.1 Создаем датчики
-		// название, исходное значение
-		AxleSensor sensor1{ 1, 32760 };
-		AxleSensor sensor2(2, 0);
-		AxleSensor sensor3(3, 0);
-		AxleSensor sensor4(4, 32761);
-		AxleSensor sensor5(5, 32727);
-		AxleSensor sensor6(6, 0);
-		AxleSensor sensor7(7, 0);
-		AxleSensor sensor8(8, 0);
-		AxleSensor sensor9(9, 0);
-		AxleSensor sensor10(10, 0);
-		AxleSensor sensor11(11, 0);
-		AxleSensor sensor12(12, 0);
-		AxleSensor sensor13(13, 32750);
-		AxleSensor sensor14(14, 0);
-		AxleSensor sensor15(15, 0);
-		AxleSensor sensor16(16, 32760);
-		AxleSensor sensor17(17, 0);
-		AxleSensor sensor18(18, 0);
-		AxleSensor sensor19(19, 32761);
-		AxleSensor sensor20(20, 0);
-		AxleSensor sensor21(21, 33);
-		AxleSensor sensor22(22, 0);
-		AxleSensor sensor23(23, 0);
-		AxleSensor sensor24(24, 1000);
+		auto axle_sensors = data["AxleSensors"];
+		// вектор указателей на Сенсоры
+		std::vector<AxleSensor*> AxleSensors;
+
+		if (!axle_sensors.is_null() && axle_sensors.is_array()) {
+			for (const auto& sensor : axle_sensors) {
+				int sensorID = sensor["SensorID"];
+				int initValue = sensor["InitValue"];
+				AxleSensors.push_back(new AxleSensor(sensorID, initValue)); 		// название, исходное значение
+			}
+		}
+		else {
+			std::cerr << "Failed to access 'AxleSensors' field or it is not an array." << std::endl;
+		}
 
 		// 1.2 Создаем маршруты
-		// номер
-		TrainRoute route1(1);
-		route1.addSensor(&sensor4, 0); //сенсор, расстояние от первого сенсора (начала маршрута) в метрах
-		route1.addSensor(&sensor5, 120);
-		route1.addSensor(&sensor13, 220);
+		auto routes = data["Routes"];
+		// вектор указателей на Маршруты
+		std::vector<TrainRoute*> TrainRoutes;
+		if (!routes.is_null() && routes.is_array() && routes.size()) {
+			for (const auto& route : routes) {
+				int routeID = route["RouteID"];
+				TrainRoutes.push_back(new TrainRoute(routeID)); 	// создается пустой маршрут
+				// добавление сенсоров в маршрут
+				json sensorsArray = route["Sensors"];
+				if (!sensorsArray.is_null() && sensorsArray.is_array() && sensorsArray.size()) {
+					for (const auto& sensor : sensorsArray) {
+						int sensorID = sensor["SensorID"];
+						int len = sensor["Length"];
+						// получить ссылку на сенсор со считаным ID
+						auto AxleSensorIterator = AxleSensors.begin();
+						bool added = false;
+						for (AxleSensorIterator = AxleSensors.begin(); AxleSensorIterator != AxleSensors.end(); ++AxleSensorIterator) {
+							if ((*AxleSensorIterator)->getId() == sensorID) {
+								TrainRoutes.back()->addSensor((*AxleSensorIterator), len); // добавление сенсоров в маршрут
+								added = true;
+								break;
+							}
+						}
+						if (!added) {
+							std::cerr << "Not found sensor for Route " << routeID << std::endl;
+						}
+					}
+				}
+				else {
+					std::cerr << "Failed to access 'Routes - Sensors' field or it is not an array." << std::endl;
+				}
+			}
+		}
+		else {
+			std::cerr << "Failed to access 'Routes' field or it is not an array." << std::endl;
+		}
 
-		TrainRoute route2(2);
-		route2.addSensor(&sensor13, 0);
-		route2.addSensor(&sensor5, 100);
-		route2.addSensor(&sensor3, 210);
-		route2.addSensor(&sensor1, 260);
-
-		TrainRoute route3(3);
-		route3.addSensor(&sensor12, 0);
-		route3.addSensor(&sensor9, 150);
-		route3.addSensor(&sensor2, 300);
-		route3.addSensor(&sensor1, 350);
-
-		TrainRoute route4(4);
-		route4.addSensor(&sensor22, 0);
-		route4.addSensor(&sensor21, 50);
-		route4.addSensor(&sensor24, 150);
-		route4.addSensor(&sensor14, 200);
+		// проверка, что в маршруте есть хотя бы один сенсор
+		for (const auto& trainRoute : TrainRoutes) {
+			if((trainRoute->getSensors()).size() == 0)
+				std::cerr << "Zero sensors in Route " << trainRoute->getId() << std::endl;
+		}
 
 		// 1.3 Создаем участки
-		// название, исходное количество осей на участке
-		Section section_3_7SP("3_7SP", 0);
-		// описание датчиков относящихся к участку
-		// датчик, признак инкремента при условном направлении "А"
-		section_3_7SP.addSensor(&sensor3, true);//+
-		section_3_7SP.addSensor(&sensor4, true);//+
-		section_3_7SP.addSensor(&sensor5, false);//-
-		section_3_7SP.addSensor(&sensor6, false);//-
-		section_3_7SP.addSensor(&sensor7, false);//-
-
-		Section section_9SP("9SP", 0);
-		section_9SP.addSensor(&sensor5, true);//+
-		section_9SP.addSensor(&sensor10, false);//-
-		section_9SP.addSensor(&sensor13, false);//-
-
-		Section section_1SP("1SP", 0);
-		section_1SP.addSensor(&sensor1, true);//+
-		section_1SP.addSensor(&sensor2, false);//-
-		section_1SP.addSensor(&sensor3, false);//-
-
-		Section section_1_11P("1/11P", 0);
-		section_1_11P.addSensor(&sensor2, true);//+
-		section_1_11P.addSensor(&sensor9, false);//-
-
-		Section section_11_13SP("11_13SP", 0);
-		section_11_13SP.addSensor(&sensor9, true);//+
-		section_11_13SP.addSensor(&sensor10, true);//+
-		section_11_13SP.addSensor(&sensor11, false);//-
-		section_11_13SP.addSensor(&sensor12, false);//-
-
-		Section put1P("1P", 10);
-		put1P.addSensor(&sensor13, true);//+
-		put1P.addSensor(&sensor14, false);//-
-
-		Section put2P("2P", 38);
-		put2P.addSensor(&sensor12, true);//+
-		put2P.addSensor(&sensor16, false);//-
-
-		Section put3P("3P", 0);
-		put3P.addSensor(&sensor6, true);//+
-		put3P.addSensor(&sensor15, false);//-
-
-		Section put4P("4P", 10);
-		put4P.addSensor(&sensor7, true);//+
-		put4P.addSensor(&sensor8, false);//-
-
-		Section section_2SP("2SP", 0);
-		section_2SP.addSensor(&sensor20, true);//+
-		section_2SP.addSensor(&sensor21, true);//+
-		section_2SP.addSensor(&sensor22, false);//-
-
-		Section section_12SP("12SP", 0);
-		section_12SP.addSensor(&sensor16, true);//+
-		section_12SP.addSensor(&sensor17, false);//-
-		section_12SP.addSensor(&sensor18, false);//-
-
-		Section section_2_12P("2/12P", 0);
-		section_2_12P.addSensor(&sensor18, true);//+
-		section_2_12P.addSensor(&sensor20, false);//-
-
-		Section section_4_6SP("4_6SP", 0);
-		section_4_6SP.addSensor(&sensor24, true);//+
-		section_4_6SP.addSensor(&sensor19, true);//+
-		section_4_6SP.addSensor(&sensor21, false);//-
-		section_4_6SP.addSensor(&sensor23, false);//-
-
-		Section section_8SP("8SP", 0);
-		section_8SP.addSensor(&sensor8, true);//+
-		section_8SP.addSensor(&sensor15, true);//+
-		section_8SP.addSensor(&sensor19, false);//-
-
-		Section section_10SP("10SP", 0);
-		section_10SP.addSensor(&sensor14, true);//+
-		section_10SP.addSensor(&sensor17, true);//+
-		section_10SP.addSensor(&sensor24, false);//-
-
+		auto sections = data["Sections"];
 		// вектор указателей на Участки, который будет передан в цикл 100 мс
 		std::vector<Section*> Sections;
-		Sections.push_back(&section_3_7SP);
-		Sections.push_back(&section_9SP);
-		Sections.push_back(&section_1SP);
-		Sections.push_back(&section_1_11P);
-		Sections.push_back(&section_11_13SP);
-		Sections.push_back(&put1P);
-		Sections.push_back(&put2P);
-		Sections.push_back(&put3P);
-		Sections.push_back(&put4P);
-		Sections.push_back(&section_2SP);
-		Sections.push_back(&section_12SP);
-		Sections.push_back(&section_2_12P);
-		Sections.push_back(&section_4_6SP);
-		Sections.push_back(&section_8SP);
-		Sections.push_back(&section_10SP);
+		if (!sections.is_null() && sections.is_array() && sections.size()) {
+			for (const auto& section : sections) {
+				std::string name = section["Name"];
+				int axles = section["Axles"];
+				Sections.push_back(new Section(name, axles)); // создание нового участка. название, исходное количество осей на участке
+				json sensorsArray = section["Sensors"];
+				if (!sensorsArray.is_null() && sensorsArray.is_array() && sensorsArray.size()) {
+					for (const auto& sensor : sensorsArray) {
+						int sensorID = sensor["SensorID"];
+						std::string sign = sensor["Sign"];
+						bool isIn = (sign == "+");
+						// получить ссылку на сенсор со считаным ID
+						auto AxleSensorIterator = AxleSensors.begin();
+						bool added = false;
+						for (AxleSensorIterator = AxleSensors.begin(); AxleSensorIterator != AxleSensors.end(); ++AxleSensorIterator) {
+							if ((*AxleSensorIterator)->getId() == sensorID) {
+								Sections.back()->addSensor((*AxleSensorIterator), isIn); // добавление сенсоров в секцию
+								added = true;
+								break;
+							}
+						}
+						if (!added) {
+							std::cerr << "Sensor " << sensorID << " in Section " << name << " not found " << std::endl;
+						}
+					}
+				}
+				else {
+					std::cerr << "Failed to access 'Sections - Sensors' field or it is not an array." << std::endl;
+				}
+			}
+		}
+		else {
+			std::cerr << "Failed to access 'Sections' field or it is not an array." << std::endl;
+		}
+
+		// проверка, что в секции есть хотя бы два сенсора
+		for (const auto& section : Sections) {
+			if ((section->getSensors()).size() < 2)
+				std::cerr << "Less than 2 sensors in section " << section->GetName() << std::endl;
+		}
 
 		// 1.4 Создаем поезда
-		// направление, количество осей, маршрут, скорость (км/ч)
-		Train trainA(0, 44, &route1, 60);//0 - direction "A", 44 - axles, 60 km/h
-		Train trainB(1, 6, &route2, 60);//1 - direction "B", 6 - axles, 60 km/h
-		Train trainB3(1, 38, &route3, 60);// со 2-го пути в четном направлении
-		Train trainB4(1, 46, &route4, 60);// на 1-й путь в четном направлении
+		auto trains = data["Trains"];
+		std::vector<Train*> Trains;
+		if (!trains.is_null() && trains.is_array() && trains.size()) {
+			for (const auto& train : trains) {
+				int trainId = train["TrainID"];
+				std::string dir = train["Direction"];
+				int direction = 0;
+				if (dir == "B")
+					direction = 1;
+				int axles = train["Axles"];
+				int routeID = train["RouteID"];
+				int speed = train["Speed"];
+				// получить ссылку на маршрут
+				auto RouteIterator = TrainRoutes.begin();
+				bool added = false;
+				for (RouteIterator = TrainRoutes.begin(); RouteIterator != TrainRoutes.end(); ++RouteIterator) {
+					if ((*RouteIterator)->getId() == routeID) {
+						Trains.push_back(new Train(trainId, direction, axles, (*RouteIterator), speed)); // создание нового поезда. id, направление, количество осей, маршрут, скорость (км/ч)
+						added = true;
+						break;
+					}
+				}
+				if (!added) {
+					std::cerr << "Not found rout " << routeID << " for Train " << trainId << std::endl;
+				}
+			}
+		}
+		else {
+			std::cerr << "Failed to access 'Trains' field or it is not an array." << std::endl;
+		}
 
 		// 2. Симуляция
 		// запустить в отдельном потоке функцию Run_Cycle, главный цикл 100 мс
@@ -192,70 +202,49 @@ int main() {
 		// дать некоторое время для старта цикла
 		std::this_thread::sleep_for(std::chrono::seconds(1));
 
-		// 1-й,3-й,4-й поезда едут одновременно
-		// начинают движение с небольшой случайной задержкой
-		// в отдельном потоке вызываем train.move()
-		// который создаст отдельный поток для каждого сенсора
-		// маршруты поездов не пересекаются
-		// два одновременных поезда на 1-й путь с разных перегонов
-		// и один со 2-го пути на перегон
-		std::thread trainMoveThread(&Train::move, &trainA);
-		std::this_thread::sleep_for(std::chrono::milliseconds(generateRandomValue(100, 2000))); // перерыв между поездами
-		std::thread trainMoveThreadB3(&Train::move, &trainB3);
-		std::this_thread::sleep_for(std::chrono::milliseconds(generateRandomValue(100, 2000))); // перерыв между поездами
-		std::thread trainMoveThreadB4(&Train::move, &trainB4);
+		std::vector<std::thread> threads; // потоки с запущенными поездами
+
+		// получить очередность движения поездов
+		auto runs = data["Run"];
+		if (!runs.is_null() && runs.is_array() && runs.size()) {
+			for (const auto& one_run : runs) {
+				int trainID = one_run["TrainID"];
+				int timeDelay = one_run["TimeDelay"];
+				// получить ссылку на поезд
+				auto TrainIterator = Trains.begin();
+				bool added = false;
+				for (TrainIterator = Trains.begin(); TrainIterator != Trains.end(); ++TrainIterator) {
+					if ((*TrainIterator)->getId() == trainID) {
+						threads.emplace_back(&Train::move, (*TrainIterator)); // начать движение поезда
+						std::this_thread::sleep_for(std::chrono::seconds(timeDelay));
+						added = true;
+						break;
+					}
+				}
+				if (!added) {
+					std::cerr << "Can`t run train " << trainID << std::endl;
+				}
+			}
+		}
+		else {
+			std::cerr << "Failed to access 'Run' field or it is not an array." << std::endl;
+		}
 
 		// дождаться завершения проезда поездов
-		trainMoveThreadB3.join();
-		trainMoveThreadB4.join();
-		trainMoveThread.join();
+		for (auto& thread : threads) {
+			thread.join();
+		}
 
-		// проверки правильности счета после первых 3-х поездов (добавить проверки)
-		if (put1P.getAxles() != 100)
-			errors.push_back("Put 1P has no 100 axles");
-		if (put2P.getAxles() != 0)
-			errors.push_back("Put 2P has axles");
-		if (sensor1.getCount() != 32722)
-			errors.push_back("Sensor1 expects 32722");
-		if (sensor2.getCount() != 32730)
-			errors.push_back("Sensor2 expects 32730");
-		if (sensor5.getCount() != 3)
-			errors.push_back("Sensor5 expects 3");
-		if (sensor13.getCount() != 26)
-			errors.push_back("Sensor13 expects 26");
-		if (sensor21.getCount() != 32755)
-			errors.push_back("Sensor21 expects 32755");
-
-		// 2-й поезд, с 1-го пути на перегон
-		std::this_thread::sleep_for(std::chrono::seconds(3)); // перерыв между поездами
-		// в отдельном потоке вызываем train.move()
-		std::thread trainMoveThread2(&Train::move, &trainB);
-		// дождаться завершения проезда поезда
-		trainMoveThread2.join();
-
-		// 3 после отработки train.move() остановить поток
+		// 3 после отработки train.move() остановить цикл
 		// ожидание освобождения секций ( у них есть выдержка времени для освобождения )
 		std::this_thread::sleep_for(std::chrono::seconds(4));
 		mainCycle.Stop();
 		Cycle100.join();
 
-		// проверки правильности счета
-		if (put1P.getAxles() != 94)
-			errors.push_back("Put 1P has no 94 axles");
-		if (sensor1.getCount() != 32716)
-			errors.push_back("Sensor1 expects 32716");
-		if (sensor2.getCount() != 32730)
-			errors.push_back("Sensor2 expects 32730");
-		if (sensor5.getCount() != 32765)
-			errors.push_back("Sensor5 expects 32765");
-		if (sensor13.getCount() != 20)
-			errors.push_back("Sensor13 expects 20");
-		if (sensor21.getCount() != 32755)
-			errors.push_back("Sensor21 expects 32755");
-
 	} // выход за область видимости, уничтожение объектов
 
 	// 4
+	/*
 	if (errors.size()) {
 		std::cout << "****** ERRORS! ******" << std::endl;
 		for (auto e : errors) {
@@ -263,6 +252,7 @@ int main() {
 		}
 		std::cout << "*********************" << std::endl;
 	}
+	*/
 
 	std::cout.rdbuf(consoleBuffer);
 	outputFile.close();

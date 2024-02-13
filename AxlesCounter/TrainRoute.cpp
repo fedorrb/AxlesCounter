@@ -9,3 +9,8 @@ void TrainRoute::addSensor(AxleSensor* sensor, int section_length) {
 const std::vector<std::pair<AxleSensor*, int>>& TrainRoute::getSensors() const {
 	return sensors;
 }
+
+int TrainRoute::getId() const
+{
+    return id;
+}

@@ -20,11 +20,14 @@ extern std::mutex cout_mutex; // семафор для вывода в выходной поток из разных п
 // после создания всех потоков ожидается их завершение
 class Train {
 public:
-	Train(int direction, int axlesCount, TrainRoute* route, int speed);
+	Train(int id, int direction, int axlesCount, TrainRoute* route, int speed);
 
 	void move();
 
+	int getId() const;
+
 private:
+	int id;
 	int direction;
 	int axlesCount;
 	TrainRoute* route; //маршрут

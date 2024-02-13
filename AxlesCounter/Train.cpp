@@ -1,6 +1,6 @@
 #include "Train.h"
-Train::Train(int direction, int axlesCount, TrainRoute* route, int speed)
-	: direction(direction), axlesCount(axlesCount), route(route), speed(speed) {
+Train::Train(int id, int direction, int axlesCount, TrainRoute* route, int speed)
+	: id(id), direction(direction), axlesCount(axlesCount), route(route), speed(speed) {
 	sensor_delay = 0;
 	speed_m_s = 0;
 	CalcAxlesDelay();
@@ -9,7 +9,7 @@ Train::Train(int direction, int axlesCount, TrainRoute* route, int speed)
 void Train::move() {
 	cout_mutex.lock();
 	std::cout << "******************************" << std::endl;
-	std::cout << "Start simulation. Train axles = " << axlesCount << ", direction to " << (direction == 0 ? "A" : "B") << std::endl;
+	std::cout << "Start simulation route: " << route->getId() << ". Train axles = " << axlesCount << ", direction to " << (direction == 0 ? "A" : "B") << std::endl;
 	cout_mutex.unlock();
 
 	std::vector<std::thread> threads;
@@ -30,9 +30,14 @@ void Train::move() {
 		thread.join();
 	}
 	cout_mutex.lock();
-	std::cout << "End simulation." << std::endl;
+	std::cout << "End simulation route: " << route->getId() << std::endl;
 	std::cout << "******************************" << std::endl;
 	cout_mutex.unlock();
+}
+
+int Train::getId() const
+{
+	return id;
 }
 
 void Train::CalcAxlesDelay() {

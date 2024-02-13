@@ -1,0 +1,239 @@
+{
+    "AxleSensors": [
+        {"SensorID": 1, "InitValue": 32760},
+        {"SensorID": 2, "InitValue": 0},
+        {"SensorID": 3, "InitValue": 0},
+        {"SensorID": 4, "InitValue": 32761},
+        {"SensorID": 5, "InitValue": 32727},
+        {"SensorID": 6, "InitValue": 0},
+		{"SensorID": 7, "InitValue": 0},
+        {"SensorID": 8, "InitValue": 0},
+        {"SensorID": 9, "InitValue": 0},
+        {"SensorID": 10, "InitValue": 0},
+        {"SensorID": 11, "InitValue": 0},
+        {"SensorID": 12, "InitValue": 0},
+        {"SensorID": 13, "InitValue": 32750},
+        {"SensorID": 14, "InitValue": 0},
+        {"SensorID": 15, "InitValue": 0},
+        {"SensorID": 16, "InitValue": 32760},
+        {"SensorID": 17, "InitValue": 0},
+        {"SensorID": 18, "InitValue": 0},
+        {"SensorID": 19, "InitValue": 32761},
+        {"SensorID": 20, "InitValue": 0},
+        {"SensorID": 21, "InitValue": 33},
+        {"SensorID": 22, "InitValue": 0},
+        {"SensorID": 23, "InitValue": 0},				
+        {"SensorID": 24, "InitValue": 1000}
+    ],
+    "Routes": [
+        {
+            "RouteID": 1,
+            "Sensors": [
+                {"SensorID": 4, "Length": 0},
+                {"SensorID": 5, "Length": 120},				
+                {"SensorID": 13, "Length": 220}
+            ]
+        },
+        {
+            "RouteID": 2,
+            "Sensors": [
+                {"SensorID": 13, "Length": 0},
+                {"SensorID": 5, "Length": 100},				
+                {"SensorID": 3, "Length": 210},
+                {"SensorID": 1, "Length": 260}				
+            ]
+        },
+        {
+            "RouteID": 3,
+            "Sensors": [
+                {"SensorID": 12, "Length": 0},
+                {"SensorID": 9, "Length": 150},				
+                {"SensorID": 2, "Length": 300},
+                {"SensorID": 1, "Length": 350}				
+            ]
+        },
+        {
+            "RouteID": 4,
+            "Sensors": [
+                {"SensorID": 22, "Length": 0},
+                {"SensorID": 21, "Length": 50},
+                {"SensorID": 24, "Length": 150},
+                {"SensorID": 14, "Length": 200}				
+            ]
+        }		
+    ],
+    "Sections": [
+        {
+            "Name": "3-7SP",
+			"Axles": 0,
+            "Sensors": [
+                {"SensorID": 3, "Sign": "+"},
+				{"SensorID": 4, "Sign": "+"},
+				{"SensorID": 5, "Sign": "-"},
+				{"SensorID": 6, "Sign": "-"},
+                {"SensorID": 7, "Sign": "-"}
+            ]
+        },
+        {
+            "Name": "9SP",
+			"Axles": 0,
+            "Sensors": [
+                {"SensorID": 5, "Sign": "+"},
+				{"SensorID": 10, "Sign": "-"},
+                {"SensorID": 13, "Sign": "-"}
+            ]
+        },
+        {
+            "Name": "1/11P",
+			"Axles": 0,
+            "Sensors": [
+                {"SensorID": 2, "Sign": "+"},
+                {"SensorID": 9, "Sign": "-"}
+            ]
+        },
+        {
+            "Name": "11-13SP",
+			"Axles": 0,
+            "Sensors": [
+                {"SensorID": 9, "Sign": "+"},
+				{"SensorID": 10, "Sign": "+"},
+				{"SensorID": 11, "Sign": "-"},
+                {"SensorID": 12, "Sign": "-"}
+            ]
+        },
+        {
+            "Name": "1P",
+			"Axles": 10,
+            "Sensors": [
+                {"SensorID": 13, "Sign": "+"},
+                {"SensorID": 14, "Sign": "-"}
+            ]
+        },
+        {
+            "Name": "2P",
+			"Axles": 38,
+            "Sensors": [
+                {"SensorID": 12, "Sign": "+"},
+                {"SensorID": 16, "Sign": "-"}
+            ]
+        },
+        {
+            "Name": "3P",
+			"Axles": 0,
+            "Sensors": [
+                {"SensorID": 6, "Sign": "+"},
+                {"SensorID": 15, "Sign": "-"}
+            ]
+        },
+        {
+            "Name": "4P",
+			"Axles": 10,
+            "Sensors": [
+                {"SensorID": 7, "Sign": "+"},
+                {"SensorID": 8, "Sign": "-"}
+            ]
+        },
+        {
+            "Name": "2SP",
+			"Axles": 0,
+            "Sensors": [
+                {"SensorID": 20, "Sign": "+"},
+				{"SensorID": 21, "Sign": "+"},
+                {"SensorID": 22, "Sign": "-"}
+            ]
+        },
+        {
+            "Name": "12SP",
+			"Axles": 0,
+            "Sensors": [
+                {"SensorID": 16, "Sign": "+"},
+				{"SensorID": 17, "Sign": "-"},
+                {"SensorID": 18, "Sign": "-"}
+            ]
+        },
+        {
+            "Name": "2/12P",
+			"Axles": 0,
+            "Sensors": [
+                {"SensorID": 18, "Sign": "+"},
+                {"SensorID": 20, "Sign": "-"}
+            ]
+        },		
+        {
+            "Name": "4-6SP",
+			"Axles": 0,
+            "Sensors": [
+                {"SensorID": 24, "Sign": "+"},
+				{"SensorID": 19, "Sign": "+"},
+				{"SensorID": 21, "Sign": "-"},
+                {"SensorID": 23, "Sign": "-"}
+            ]
+        },
+        {
+            "Name": "8SP",
+			"Axles": 0,
+            "Sensors": [
+                {"SensorID": 8, "Sign": "+"},
+				{"SensorID": 15, "Sign": "+"},
+                {"SensorID": 19, "Sign": "-"}
+            ]
+        },		
+        {
+            "Name": "10SP",
+			"Axles": 0,
+            "Sensors": [
+                {"SensorID": 14, "Sign": "+"},
+				{"SensorID": 17, "Sign": "+"},
+                {"SensorID": 24, "Sign": "-"}
+            ]
+        }		
+    ],
+    "Trains": [
+        {
+            "TrainID": 1,
+            "Direction": "A",
+			"Axles": 44,
+			"RouteID": 1,
+			"Speed": 60
+        },
+        {
+            "TrainID": 2,
+            "Direction": "B",
+			"Axles": 6,
+			"RouteID": 2,
+			"Speed": 60
+        },
+        {
+            "TrainID": 3,
+            "Direction": "B",
+			"Axles": 38,
+			"RouteID": 3,
+			"Speed": 60
+        },
+        {
+            "TrainID": 4,
+            "Direction": "B",
+			"Axles": 46,
+			"RouteID": 4,
+			"Speed": 60
+        }
+    ],
+	"Run": [
+		{
+			"TrainID": 1,
+			"TimeDelay": 1
+		},
+		{
+			"TrainID": 2,
+			"TimeDelay": 1
+		},
+		{
+			"TrainID": 3,
+			"TimeDelay": 1
+		},		
+		{
+			"TrainID": 4,
+			"TimeDelay": 60
+		}
+	]
+}
