@@ -21,6 +21,7 @@ std::mutex cout_mutex; // семафор для вывода в выходной поток из разных потоков
 int main(int argc, char** argv) {
 	//std::vector<std::string> errors;
 	//errors.clear();
+
 	std::string JSONFileName = "AxlesCounter.json";
 	if (argc > 1) {
 		JSONFileName = argv[1];
@@ -29,6 +30,7 @@ int main(int argc, char** argv) {
 	if(argc == 1)
 		std::cout << "To read the configuration from another file, pass it as a parameter" << std::endl;
 	std::cout << "Working..." << std::endl;
+
 	// файл журнала
 	std::ofstream outputFile("output.txt");
 	if (!outputFile.is_open()) {
@@ -215,8 +217,9 @@ int main(int argc, char** argv) {
 				bool added = false;
 				for (TrainIterator = Trains.begin(); TrainIterator != Trains.end(); ++TrainIterator) {
 					if ((*TrainIterator)->getId() == trainID) {
-						threads.emplace_back(&Train::move, (*TrainIterator)); // начать движение поезда
 						std::this_thread::sleep_for(std::chrono::seconds(timeDelay));
+						threads.emplace_back(&Train::move, (*TrainIterator)); // начать движение поезда
+						threads.back().detach();
 						added = true;
 						break;
 					}
@@ -231,8 +234,15 @@ int main(int argc, char** argv) {
 		}
 
 		// дождаться завершения проезда поездов
-		for (auto& thread : threads) {
-			thread.join();
+		while (true) {
+			bool running = false;
+			std::this_thread::sleep_for(std::chrono::seconds(1));
+			for (auto& train : Trains) {
+				if (train->getIsMove())
+					running = true;
+			}
+			if (!running)
+				break;
 		}
 
 		// 3 после отработки train.move() остановить цикл
@@ -240,6 +250,27 @@ int main(int argc, char** argv) {
 		std::this_thread::sleep_for(std::chrono::seconds(4));
 		mainCycle.Stop();
 		Cycle100.join();
+
+		// уничтожение объектов
+		for (auto train : Trains) {
+			delete train;
+		}
+		Trains.clear();
+
+		for (auto section : Sections) {
+			delete section;
+		}
+		Sections.clear();
+
+		for (auto trainRoute : TrainRoutes) {
+			delete trainRoute;
+		}
+		TrainRoutes.clear();
+
+		for (auto sensor : AxleSensors) {
+			delete sensor;
+		}
+		AxleSensors.clear();
 
 	} // выход за область видимости, уничтожение объектов
 

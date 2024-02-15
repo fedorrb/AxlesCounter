@@ -25,6 +25,7 @@ public:
 	void move();
 
 	int getId() const;
+	bool getIsMove() const;
 
 private:
 	int id;
@@ -34,6 +35,7 @@ private:
 	int speed; //km/h
 	int sensor_delay;
 	double speed_m_s;
+	bool isMove;
 
 	void CalcAxlesDelay();
 };

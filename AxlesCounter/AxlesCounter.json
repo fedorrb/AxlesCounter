@@ -84,6 +84,15 @@
             ]
         },
         {
+            "Name": "1SP",
+			"Axles": 0,
+            "Sensors": [
+                {"SensorID": 1, "Sign": "+"},
+				{"SensorID": 2, "Sign": "-"},
+                {"SensorID": 3, "Sign": "-"}
+            ]
+        },		
+        {
             "Name": "1/11P",
 			"Axles": 0,
             "Sensors": [
@@ -224,15 +233,15 @@
 			"TimeDelay": 1
 		},
 		{
-			"TrainID": 2,
+			"TrainID": 3,
 			"TimeDelay": 1
 		},
 		{
-			"TrainID": 3,
+			"TrainID": 4,
 			"TimeDelay": 1
 		},		
 		{
-			"TrainID": 4,
+			"TrainID": 2,
 			"TimeDelay": 60
 		}
 	]
