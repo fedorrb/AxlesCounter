@@ -26,6 +26,7 @@ public:
 
 	int getId() const;
 	bool getIsMove() const;
+	int getIdRoute() const;
 
 private:
 	int id;

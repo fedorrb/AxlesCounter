@@ -203,7 +203,7 @@
             "Direction": "A",
 			"Axles": 44,
 			"RouteID": 1,
-			"Speed": 60
+			"Speed": 160
         },
         {
             "TrainID": 2,
@@ -217,7 +217,7 @@
             "Direction": "B",
 			"Axles": 38,
 			"RouteID": 3,
-			"Speed": 60
+			"Speed": 160
         },
         {
             "TrainID": 4,
@@ -242,7 +242,7 @@
 		},		
 		{
 			"TrainID": 2,
-			"TimeDelay": 60
+			"TimeDelay": 0
 		}
 	]
 }

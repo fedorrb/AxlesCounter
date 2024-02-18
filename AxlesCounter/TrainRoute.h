@@ -16,9 +16,16 @@ public:
 
 	int getId() const;
 
+	bool getLock() const;
+
+	void setLock(bool b);
+
+	std::set<int> getSetSensors();
+
 private:
 	int id;
 	std::vector<std::pair<AxleSensor*, int>> sensors;
+	bool lock;
 };
 
 #endif

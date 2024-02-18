@@ -62,6 +62,8 @@ void Train::move() {
 	std::cout << "******************************" << std::endl;
 	cout_mutex.unlock();
 	isMove = false;
+	// "освободить" маршрут
+	route->setLock(false);
 }
 
 int Train::getId() const
@@ -72,6 +74,11 @@ int Train::getId() const
 bool Train::getIsMove() const
 {
 	return isMove;
+}
+
+int Train::getIdRoute() const
+{
+	return route->getId();
 }
 
 void Train::CalcAxlesDelay() {

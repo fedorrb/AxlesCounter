@@ -19,8 +19,6 @@ using json = nlohmann::json;
 std::mutex cout_mutex; // семафор для вывода в выходной поток из разных потоков
 
 int main(int argc, char** argv) {
-	//std::vector<std::string> errors;
-	//errors.clear();
 
 	std::string JSONFileName = "AxlesCounter.json";
 	if (argc > 1) {
@@ -117,6 +115,22 @@ int main(int argc, char** argv) {
 		for (const auto& trainRoute : TrainRoutes) {
 			if((trainRoute->getSensors()).size() == 0)
 				std::cerr << "Zero sensors in Route " << trainRoute->getId() << std::endl;
+		}
+
+		// определение враждебных маршрутов
+		std::multimap<int, int> hostileRouts;
+		for (auto it1 = TrainRoutes.begin(); it1 != TrainRoutes.end(); ++it1) {
+			std::set<int> routeSensors1 = (*it1)->getSetSensors();
+			for (auto it2 = TrainRoutes.begin(); it2 != TrainRoutes.end(); ++it2) {
+				std::set<int> routeSensors2 = (*it2)->getSetSensors();
+				int old_size = routeSensors2.size();
+				for (int sensorId : routeSensors1) {
+					routeSensors2.insert(sensorId); // если маршрут враждебный, то существующие сенсоры не добавятся
+				}
+				if (routeSensors1.size() + old_size != routeSensors2.size()) {
+					hostileRouts.insert( std::make_pair((*it1)->getId(), (*it2)->getId()) );
+				}
+			}
 		}
 
 		// 1.3 Создаем участки
@@ -218,6 +232,35 @@ int main(int argc, char** argv) {
 				for (TrainIterator = Trains.begin(); TrainIterator != Trains.end(); ++TrainIterator) {
 					if ((*TrainIterator)->getId() == trainID) {
 						std::this_thread::sleep_for(std::chrono::seconds(timeDelay));
+						// проверка на враждебный маршрут
+						// номер маршрута
+						int routeId = (*TrainIterator)->getIdRoute();
+						while (true) {
+							bool hostile = false;
+							// проверить есть ли для него враждебные
+							auto range = hostileRouts.equal_range(routeId);
+							for (auto it = range.first; it != range.second; ++it) {
+								for (auto route : TrainRoutes) {
+									if (it->second == route->getId() && route->getLock()) {
+										hostile = true; 	// враждебный и замкнутый
+										break;
+									}
+								}
+							}
+							if (hostile)
+								std::this_thread::sleep_for(std::chrono::seconds(1)); // если враждебный, то ждем и проверяем снова
+							else
+								break;
+						}
+						// end проверка на враждебность
+						// "замкнуть" маршрут, размыкание при завершении потока
+						// здесь, потому что время на создание потока больше времени итерации в данном цикле
+						for (auto route : TrainRoutes) {
+							if (routeId == route->getId()) {
+								route->setLock(true);
+								break;
+							}
+						}
 						threads.emplace_back(&Train::move, (*TrainIterator)); // начать движение поезда
 						threads.back().detach();
 						added = true;
@@ -273,17 +316,6 @@ int main(int argc, char** argv) {
 		AxleSensors.clear();
 
 	} // выход за область видимости, уничтожение объектов
-
-	// 4
-	/*
-	if (errors.size()) {
-		std::cout << "****** ERRORS! ******" << std::endl;
-		for (auto e : errors) {
-			std::cout << e << std::endl;
-		}
-		std::cout << "*********************" << std::endl;
-	}
-	*/
 
 	std::cout.rdbuf(consoleBuffer);
 	outputFile.close();

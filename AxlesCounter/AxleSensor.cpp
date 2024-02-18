@@ -23,7 +23,7 @@ void AxleSensor::generateSensorSignal(int axles, int direction, int delay, int a
 	delays.push_back(axle_delay * 2 - sensorOccupied); // 2 метра между осями
 	delays.push_back(axle_delay * 3 - sensorOccupied); // 3 метра между тележками соседних вагонов
 
-	for (int i = 0, j = 0; i < axles; i++, j++) {
+	for (int i = 0; i < axles; i++) {
 		// пока колесо находится над датчиком сенсорная система занята 
 		// значение счетчика не меняется
 		occupied = true;
@@ -38,7 +38,7 @@ void AxleSensor::generateSensorSignal(int axles, int direction, int delay, int a
 			count = Math15::Sub15(count, 1);
 		}
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(delays[j % 4])); // задержка на проход оси
+		std::this_thread::sleep_for(std::chrono::milliseconds(delays[i % 4])); // задержка на проход оси
 	}
 }
 
