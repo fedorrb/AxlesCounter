@@ -43,6 +43,8 @@ public:
 
 	std::string GetName() const;
 
+	bool isConfigValid();
+
 private:
 	//инициализация после добавления в секцию датчика
 	void InitBefore();

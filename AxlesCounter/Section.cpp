@@ -88,6 +88,20 @@ std::string Section::GetName() const
 	return name;
 }
 
+bool Section::isConfigValid()
+{
+	bool twoOrMore = (sensors.size() >= 2);
+	bool minus = false;
+	bool plus = false;
+	for (const auto& sensorInfo : sensors) {
+		if (sensorInfo.second)
+			plus = true;
+		else
+			minus = true;
+	}
+	return twoOrMore && plus && minus;
+}
+
 //инициализация после добавления в секцию датчика
 void Section::InitBefore() {
 	sumCounterBefore = 0;

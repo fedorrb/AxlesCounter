@@ -172,10 +172,10 @@ int main(int argc, char** argv) {
 			std::cerr << "Failed to access 'Sections' field or it is not an array." << std::endl;
 		}
 
-		// проверка, что в секции есть хотя бы два сенсора
+		// проверка, что в секции есть хотя бы два сенсора и они с разными знаками
 		for (const auto& section : Sections) {
-			if ((section->getSensors()).size() < 2)
-				std::cerr << "Less than 2 sensors in section " << section->GetName() << std::endl;
+			if (!section->isConfigValid())
+				std::cerr << "Wrong configuration sensors in section " << section->GetName() << std::endl;
 		}
 
 		// 1.4 Создаем поезда
@@ -191,6 +191,10 @@ int main(int argc, char** argv) {
 				int axles = train["Axles"];
 				int routeID = train["RouteID"];
 				int speed = train["Speed"];
+				if (speed < 1 || speed > 500) {
+					std::cerr << "Train speed is out of bounds. Speed set to 60 km/h. Train: " << trainId << std::endl;
+					speed = 60;
+				}
 				// получить ссылку на маршрут
 				auto RouteIterator = TrainRoutes.begin();
 				bool added = false;
